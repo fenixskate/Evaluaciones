@@ -1,0 +1,24 @@
+{
+  "name": "liverpool-playwright-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pruebas E2E de Liverpool con Playwright, JavaScript y Page Object Model",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:headed": "cross-env HEADED=true cucumber-js",
+    "test:video": "cross-env RECORD_VIDEO=true cucumber-js",
+    "test:quality": "playwright test --config=playwright.quality.config.js --grep-invert @visual",
+    "test:visual": "playwright test --config=playwright.quality.config.js --grep @visual",
+    "test:visual:update": "playwright test --config=playwright.quality.config.js --grep @visual --update-snapshots",
+    "test:quality:headed": "npm run test:quality -- --headed",
+    "test:parallel:headed": "npm run test:quality -- --headed --workers=3",
+    "report:quality": "playwright show-report reports/quality"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@cucumber/cucumber": "^12.2.0",
+    "@playwright/test": "^1.55.0",
+    "cross-env": "^10.0.0",
+    "playwright": "^1.55.0"
+  }
+}
