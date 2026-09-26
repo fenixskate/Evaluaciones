@@ -1,0 +1,9 @@
+services:
+  qa-automation:
+    build: .
+    environment:
+      REPORT_MODE: simulated
+      REPORT_CHANNEL: slack
+      REPORT_DESTINATION: qa-automation
+    volumes:
+      - ./output:/workspace/output
