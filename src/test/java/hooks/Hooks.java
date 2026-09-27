@@ -1,11 +1,11 @@
 package hooks;
 
-import driver.DriverManager;
+import automation.driver.DriverManager;
 import io.cucumber.java.After;
 import io.cucumber.java.AfterStep;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
-import utils.ScreenshotUtils;
+import automation.utils.ScreenshotUtils;
 
 public class Hooks {
     @Before("@web")

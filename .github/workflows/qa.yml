@@ -1,0 +1,34 @@
+name: Pruebas SauceDemo
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Tags a ejecutar (ejemplo: @CP01 or @CP05)'
+        default: 'not @pendiente'
+        required: true
+permissions:
+  contents: read
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar carpeta de evidencias
+        run: mkdir -p output && chmod 777 output
+      - name: Construir imagen
+        run: docker compose build
+      - name: Ejecutar escenarios y simulaciones
+        env:
+          TEST_TAGS: ${{ inputs.tags || 'not @pendiente' }}
+        run: docker compose run --rm qa-automation sh scripts/run-and-notify.sh -Pparallel "-Dcucumber.filter.tags=$TEST_TAGS"
+      - name: Descargar evidencias desde Actions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-${{ github.run_number }}-${{ github.run_attempt }}
+          path: output/
+          if-no-files-found: warn
+          retention-days: 14

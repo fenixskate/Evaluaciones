@@ -11,4 +11,4 @@ COPY . .
 RUN chown -R seluser:seluser /workspace
 ENV MAVEN_OPTS=-Djava.awt.headless=true
 USER seluser
-CMD ["mvn", "-B", "test", "-Dbrowser=firefox", "-Dheadless=true"]
+CMD ["sh", "scripts/run-and-notify.sh", "-Pparallel"]

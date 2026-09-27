@@ -1,9 +1,6 @@
 services:
   qa-automation:
     build: .
-    environment:
-      REPORT_MODE: simulated
-      REPORT_CHANNEL: slack
-      REPORT_DESTINATION: qa-automation
+    shm_size: '2gb'
     volumes:
       - ./output:/workspace/output

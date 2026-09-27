@@ -54,9 +54,17 @@ public final class ScenarioPdfReporter implements ConcurrentEventListener {
 
     @Override
     public void setEventPublisher(EventPublisher publisher) {
+        publisher.registerHandlerFor(TestRunStarted.class, event -> {
+            try {
+                Files.createDirectories(Path.of("target"));
+                Files.writeString(Path.of("target", "current-run.txt"), directory.toString().replace('\\', '/'));
+                Files.writeString(Path.of("target", "execution-timeline.csv"), "scenario,thread,start,end,status\n");
+            } catch (IOException e) { throw new UncheckedIOException(e); }
+        });
         publisher.registerHandlerFor(TestCaseStarted.class, event -> {
             ScenarioEvidence evidence = new ScenarioEvidence(event);
             active.put(event.getTestCase().getId(), evidence);
+            System.out.println("[INICIO] " + evidence.thread + " | " + evidence.testCase.getName());
         });
         publisher.registerHandlerFor(TestStepStarted.class, event -> {
             if (event.getTestStep() instanceof PickleStepTestStep step) {
@@ -84,7 +92,18 @@ public final class ScenarioPdfReporter implements ConcurrentEventListener {
         publisher.registerHandlerFor(TestCaseFinished.class, event -> {
             ScenarioEvidence evidence = active.remove(event.getTestCase().getId());
             writePdf(evidence, event.getResult());
+            recordTiming(evidence, event);
         });
+    }
+
+    private synchronized void recordTiming(ScenarioEvidence evidence, TestCaseFinished event) {
+        try {
+            String name = evidence.testCase.getName().replace("\"", "\"\"");
+            Files.writeString(Path.of("target", "execution-timeline.csv"),
+                    "\"" + name + "\"," + evidence.thread + "," + evidence.started + ","
+                            + event.getInstant() + "," + event.getResult().getStatus() + "\n",
+                    StandardOpenOption.APPEND);
+        } catch (IOException e) { throw new UncheckedIOException(e); }
     }
 
     private void writePdf(ScenarioEvidence evidence, Result result) {
@@ -185,6 +204,7 @@ public final class ScenarioPdfReporter implements ConcurrentEventListener {
     private static final class ScenarioEvidence {
         final TestCase testCase;
         final Instant started;
+        final String thread = Thread.currentThread().getName();
         final java.util.List<StepEvidence> steps = new ArrayList<>();
         final java.util.List<String> hookErrors = new ArrayList<>();
         ScenarioEvidence(TestCaseStarted event) {

@@ -1,15 +1,16 @@
 package steps;
 
-import actions.CheckoutActions;
+import automation.actions.CheckoutActions;
 import config.ConfigManager;
-import driver.DriverManager;
+import automation.driver.DriverManager;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Entonces;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
 import org.junit.Assert;
-import pages.CheckoutPage;
+import automation.pages.CheckoutPage;
 
 public class CheckoutSteps {
     private CheckoutActions actions() {
@@ -21,21 +22,23 @@ public class CheckoutSteps {
         actions().start();
     }
 
-    @Cuando("completa los datos del comprador configurado")
-    public void completeBuyer() {
-        actions().completeBuyer();
+    @Cuando("completa los siguientes datos del comprador")
+    public void completeBuyer(DataTable table) {
+        var data = table.asMap(String.class, String.class);
+        actions().completeBuyer(data.get("nombre"), data.get("apellido"), data.get("codigoPostal"));
     }
 
-    @Entonces("el resumen muestra el producto y los importes correctos")
-    public void verifySummary() {
+    @Entonces("el resumen muestra el siguiente producto e importes")
+    public void verifySummary(DataTable table) {
+        var data = table.asMap(String.class, String.class);
         CheckoutPage page = new CheckoutPage(DriverManager.getDriver());
-        Assert.assertEquals(ConfigManager.get("expected.checkout.title"), page.title());
+        Assert.assertEquals(data.get("titulo"), page.title());
         Assert.assertEquals("Un solo producto en el resumen", 1, page.productCount());
-        Assert.assertEquals(ConfigManager.get("product.name"), page.productName());
-        Assert.assertEquals(ConfigManager.get("product.quantity"), page.productQuantity());
-        BigDecimal price = amount(ConfigManager.get("product.price"));
-        BigDecimal subtotal = price.multiply(new BigDecimal(ConfigManager.get("product.quantity")));
-        BigDecimal tax = subtotal.multiply(new BigDecimal(ConfigManager.get("checkout.tax.rate")))
+        Assert.assertEquals(data.get("nombre"), page.productName());
+        Assert.assertEquals(data.get("cantidad"), page.productQuantity());
+        BigDecimal price = amount(data.get("precio"));
+        BigDecimal subtotal = price.multiply(new BigDecimal(data.get("cantidad")));
+        BigDecimal tax = subtotal.multiply(new BigDecimal(data.get("tasaImpuesto")))
                 .setScale(2, RoundingMode.HALF_UP);
         assertAmount("Precio", price, page.productPrice());
         assertAmount("Subtotal", subtotal, page.subtotal());
@@ -59,13 +62,14 @@ public class CheckoutSteps {
         actions().confirm();
     }
 
-    @Entonces("se muestra la confirmación de compra exitosa")
-    public void verifyConfirmation() {
+    @Entonces("se muestra la siguiente confirmación de compra")
+    public void verifyConfirmation(DataTable table) {
+        var data = table.asMap(String.class, String.class);
         CheckoutPage page = new CheckoutPage(DriverManager.getDriver());
-        Assert.assertEquals(ConfigManager.get("expected.checkout.complete"), page.confirmationHeader());
-        Assert.assertEquals(ConfigManager.get("expected.checkout.description"), page.confirmationText());
+        Assert.assertEquals(data.get("titulo"), page.confirmationHeader());
+        Assert.assertEquals(data.get("descripcion"), page.confirmationText());
         Assert.assertEquals(URI.create(ConfigManager.get("base.url"))
-                        .resolve(ConfigManager.get("expected.checkout.path")),
+                        .resolve(data.get("ruta")),
                 URI.create(DriverManager.getDriver().getCurrentUrl()));
     }
 }

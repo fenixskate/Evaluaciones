@@ -1,15 +1,16 @@
 package steps;
 
-import actions.LoginActions;
+import automation.actions.LoginActions;
 import config.ConfigManager;
-import driver.DriverManager;
+import automation.driver.DriverManager;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.es.Cuando;
 import io.cucumber.java.es.Dado;
 import io.cucumber.java.es.Entonces;
 import java.net.URI;
 import org.junit.Assert;
-import pages.HomePage;
-import pages.LoginPage;
+import automation.pages.HomePage;
+import automation.pages.LoginPage;
 
 public class LoginSteps {
     // Se crean al ejecutar el paso, despues del hook que inicia el navegador.
@@ -22,35 +23,31 @@ public class LoginSteps {
         actions().openLogin();
     }
 
-    @Cuando("inicia sesión con el usuario válido configurado")
-    public void signInValid() {
-        actions().signInAsValidUser();
+    @Cuando("inicia sesión con usuario {string} y contraseña {string}")
+    public void signIn(String username, String password) {
+        actions().signIn(username, password);
     }
 
-    @Dado("que el usuario válido ha iniciado sesión")
-    public void authenticatedUser() {
+    @Dado("que el usuario ha iniciado sesión con los siguientes datos")
+    public void authenticatedUser(DataTable table) {
+        var data = table.asMap(String.class, String.class);
         openLogin();
-        signInValid();
-        verifyCatalog();
+        signIn(data.get("usuario"), data.get("contraseña"));
+        verifyCatalog(data.get("titulo"), data.get("ruta"));
     }
 
-    @Cuando("inicia sesión con el usuario bloqueado configurado")
-    public void signInBlocked() {
-        actions().signInAsBlockedUser();
-    }
-
-    @Entonces("se muestra el catálogo de productos")
-    public void verifyCatalog() {
+    @Entonces("se muestra el catálogo {string} en {string}")
+    public void verifyCatalog(String title, String path) {
         HomePage home = new HomePage(DriverManager.getDriver());
-        Assert.assertEquals("Titulo del catalogo", ConfigManager.get("expected.catalog.title"), home.title());
+        Assert.assertEquals("Titulo del catalogo", title, home.title());
         Assert.assertTrue("El catalogo debe mostrar productos", home.hasProducts());
-        URI expected = URI.create(ConfigManager.get("base.url")).resolve(ConfigManager.get("expected.catalog.path"));
+        URI expected = URI.create(ConfigManager.get("base.url")).resolve(path);
         Assert.assertEquals("Destino del login", expected, URI.create(DriverManager.getDriver().getCurrentUrl()));
     }
 
-    @Entonces("se muestra el mensaje de usuario bloqueado")
-    public void verifyBlockedMessage() {
-        Assert.assertEquals("Mensaje de acceso bloqueado", ConfigManager.get("expected.login.blocked"),
+    @Entonces("se muestra el mensaje de bloqueo {string}")
+    public void verifyBlockedMessage(String message) {
+        Assert.assertEquals("Mensaje de acceso bloqueado", message,
                 new LoginPage(DriverManager.getDriver()).errorMessage());
     }
 

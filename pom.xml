@@ -10,6 +10,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.40.0</selenium.version>
         <cucumber.version>7.34.8</cucumber.version>
+        <parallel.enabled>false</parallel.enabled>
+        <parallel.threads>2</parallel.threads>
     </properties>
     <dependencies>
         <dependency>
@@ -31,8 +33,14 @@
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
-            <artifactId>cucumber-junit</artifactId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
             <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.14.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -57,11 +65,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.2</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/*ParallelTest.java</exclude>
-                    </excludes>
+                    <includes><include>**/TestRunner.java</include></includes>
+                    <systemPropertyVariables>
+                        <cucumber.execution.parallel.enabled>${parallel.enabled}</cucumber.execution.parallel.enabled>
+                        <cucumber.execution.parallel.config.strategy>fixed</cucumber.execution.parallel.config.strategy>
+                        <cucumber.execution.parallel.config.fixed.parallelism>${parallel.threads}</cucumber.execution.parallel.config.fixed.parallelism>
+                        <cucumber.execution.parallel.config.fixed.max-pool-size>${parallel.threads}</cucumber.execution.parallel.config.fixed.max-pool-size>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -77,25 +89,7 @@
     <profiles>
         <profile>
             <id>parallel</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <includes>
-                                <include>**/*ParallelTest.java</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/TestRunner.java</exclude>
-                            </excludes>
-                            <parallel>classes</parallel>
-                            <threadCount>2</threadCount>
-                            <useUnlimitedThreads>false</useUnlimitedThreads>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+            <properties><parallel.enabled>true</parallel.enabled></properties>
         </profile>
     </profiles>
 </project>

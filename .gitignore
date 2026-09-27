@@ -1,5 +1,8 @@
 target/
 output/pdf/
+output/email/
+output/reports/
+output/integrations/
 tmp/
 .idea/
 .vscode/
