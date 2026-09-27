@@ -1,0 +1,32 @@
+name: API Karate Tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Tags Karate a ejecutar
+        required: false
+        default: '~@ignore'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Ejecutar Karate
+        run: mvn -s .mvn/settings.xml test -Dtags="${{ inputs.tags || '~@ignore' }}"
+      - name: Publicar evidencias
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: karate-report-${{ github.run_number }}
+          path: output/
+          if-no-files-found: warn

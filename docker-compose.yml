@@ -1,0 +1,8 @@
+services:
+  api-tests:
+    container_name: pruebaTecnicaRequest
+    build: .
+    volumes:
+      - ./output:/workspace/output
+    environment:
+      - MAVEN_OPTS=-Djava.awt.headless=true

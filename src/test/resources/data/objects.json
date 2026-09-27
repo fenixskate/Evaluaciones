@@ -1,0 +1,8 @@
+{
+  "create": {"name":"QA Modulo 2 - Laptop", "data":{"year":2024,"price":1299.50,"CPU model":"Intel Core i7","Hard disk size":"1 TB"}},
+  "update": {"name":"QA Modulo 2 - Laptop actualizada", "data":{"year":2025,"price":1499.75,"CPU model":"Intel Core i9","Hard disk size":"2 TB"}},
+  "patch": {"name":"QA Modulo 2 - Nombre editado"},
+  "missingId":"qa-nonexistent-object-00000000",
+  "malformed":"{\"name\":",
+  "statuses":{"list":200,"create":200,"get":200,"update":200,"patch":200,"delete":200,"missing":404,"malformed":400}
+}
