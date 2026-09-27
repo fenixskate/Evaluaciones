@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 test_status=0
-mvn -B clean test -Dbrowser="${BROWSER:-firefox}" -Dheadless=false "$@" || test_status=$?
+mvn -B clean test -Dbrowser="${BROWSER:-firefox}" -Dheadless="${HEADLESS:-true}" "$@" || test_status=$?
 post_status=0
 if [ -s target/current-run.txt ]; then
   evidence=$(cat target/current-run.txt)

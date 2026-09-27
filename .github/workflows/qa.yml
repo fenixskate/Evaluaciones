@@ -23,7 +23,7 @@ jobs:
       - name: Ejecutar escenarios y simulaciones
         env:
           TEST_TAGS: ${{ inputs.tags || 'not @pendiente' }}
-        run: docker compose run --rm qa-automation sh scripts/run-and-notify.sh -Pparallel "-Dcucumber.filter.tags=$TEST_TAGS"
+        run: docker compose run --rm qa-automation sh scripts/run-and-notify.sh -Pparallel -Dheadless=true "-Dcucumber.filter.tags=$TEST_TAGS"
       - name: Dar acceso al runner a las evidencias de Docker
         if: always()
         shell: bash

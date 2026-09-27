@@ -60,6 +60,13 @@ Desde la carpeta del proyecto, en Git Bash:
 sh scripts/run-and-notify.sh -Pparallel
 ```
 
+El script usa `headless=true` por defecto, necesario en GitHub Actions sin pantalla.
+Para ver Firefox únicamente en tu computadora puedes ejecutar:
+
+```bash
+sh scripts/run-and-notify.sh -Pparallel -Dheadless=false
+```
+
 Ejecuta las pruebas, guarda los reportes, crea el correo con el ZIP adjunto y
 simula la actualización de Jira/Xray. No envía correo ni modifica un Jira real.
 También acepta tags:
